@@ -1,0 +1,30 @@
+clear all, clc, close all
+
+S0 = 3; % initial stock price
+K = 4; % Strike price
+r = 1; % risk-free rate
+T = 1; % time to expiration
+sigma = 0.3; % true volatility
+mis_sigma = 0.1; % mis-specified volatility
+
+M = 1e6; % number Monte Carlo sims
+N = 1e2; % number of timesteps
+dt = T/N;
+randn("state",0);
+
+S = S0*ones(M,1);
+mis_S = S0*ones(M,1);
+S_Ts = zeros(M,1);
+
+for i = 1:M
+    %generate the Brownian motion
+    dW = sqrt(dt) * randn(N,1);
+    Wt = cumsum(dW);
+    
+    St = S0*exp((r-sigma^2/2)*T+sigma*Wt);
+   
+end
+
+
+
+
