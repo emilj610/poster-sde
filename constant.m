@@ -1,11 +1,11 @@
 clear all, clc, close all
 
-S0 = 10; % initial stock price
-K = 4; % Strike price
-r = 1; % risk-free rate
+S0 = 100; % initial stock price
+K = 110; % Strike price
+r = 0.05; % risk-free rate
 T = 1; % time to expiration
-sigma = 0.3; % true volatility
-mis_sigma = 1.2; % mis-specified volatility
+sigma = 0.5; % true volatility
+mis_sigma = 1; % mis-specified volatility
 
 M = 1e6; % number Monte Carlo sims
 N = 1e2; % number of timesteps
@@ -14,6 +14,9 @@ randn("state",0);
 
 S = zeros(M,1);
 mis_S = zeros(M,1);
+
+price = BSCH(S0,T,K,r,sigma);
+mis_price = BSCH(S0,T,K,r,mis_sigma);
 
 for i = 1:M
     %generate the Brownian motion
