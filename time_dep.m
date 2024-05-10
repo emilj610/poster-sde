@@ -1,7 +1,7 @@
 clear all, clc, close all
 
 S0 = 60; % initial stock price
-K = 40; % Strike price
+K = 20; % Strike price
 T = 4; % time to expiration
 
 %time dependent r and sigma:

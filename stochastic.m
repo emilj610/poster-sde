@@ -1,22 +1,32 @@
 clear all, clc, close all
 
 S0 = 50; % initial stock price
-K = 4; % Strike price
+K = 40; % Strike price
 T = 4; % time to expiration
-r = 0.05; % risk-free rate
+r = 0.1; % risk-free rate
 
 %paramters för SDE:n
 %for exakt
-th1 = 0.15; %rate
+th1 = 0.25; %rate
 lt1 = 0.4; %long term volatility
 xhi1 = 0.3; %volatility of volatility
-sig0 = 0.5;
 
-%for mis-specified
-th2 = 0.4; %rate
-lt2 = 0.25; %long term volatility
-xhi2 = 0.25; %volatility of volatility
-mis_sig0 = 1;
+sig0 = 0.5;
+mis_sig0 = 0.5;
+
+params = [0.25, 0.2, 0.7; 0.25, 0.2, 0.1; 0.4, 0.4, 0.7; 0.4, 0.4, 0.1; 0.4, 0.7, 0.7; 0.4, 0.7, 0.1];
+
+all_v = zeros(1,length(params));
+all_mis_v = zeros(1,length(params));
+tracking_errs = zeros(1,length(params));
+std = zeros(1,length(params));
+
+for j = 1:length(params)
+
+th2 = params(j,1); %rate
+lt2 = params(j,2); %long term volatility
+xhi2 = params(j,3); %volatility of volatility
+
 
 M = 1e6; % number Monte Carlo sims
 N = 1e2; % number of timesteps
@@ -53,29 +63,46 @@ for i = 1:N
     mis_S(:,i+1) = mis_S(:,i) + r*mis_S(:,i)*dt + mis_sig(:,i).*mis_S(:,i).*dW;
 end
 
+v = exp(-r*T) * max(S(:,end)-K,0);
+mis_v = exp(-r*T) * max(mis_S(:,end)-K,0);
+
+all_v(j) = mean(v);
+all_mis_v(j) = mean(mis_v);
+
+std(j) = sqrt(var(mis_v));
+
+tracking_errs(j) = all_mis_v(j) - all_v(j);
+
+end
+
 %%
 
-v = exp(-r*T) * mean(max(S(:,end)-K,0));
-mis_v = exp(-r*T) * mean(max(mis_S(:,end)-K,0));
+disp(all_v)
+disp(all_mis_v)
 
-disp(v)
-disp(mis_v)
+%% table
+
+T = table(params(:,1), params(:,2), params(:,3), all_mis_v', real(tracking_errs)', std', ...
+    'VariableNames', {'Rate', 'Long Term Vol', 'Vol of Vol', 'Mispecified Value', 'Tracking Error', 'Standard Deviation'});
+disp(T);
 
 %% plots
 
 hold on
-for i = 1:M/1e5-1
-    plot(t_span,S(i*1e4,:))
+S_bar = zeros(1,N+1);
+for i = 1:N+1
+    S_bar(i) = mean(S(:,i));
 end
-plot2 = plot(t_span, S(end,:), 'r', 'LineWidth', 3); % Highlighted plot
+plot2 = plot(t_span, S_bar, 'r', 'LineWidth', 2); % Highlighted plot
 
-for i = 1:M/1e5-1
-    plot(t_span,mis_S(i*1e4,:))
+mis_S_bar = zeros(1,N+1);
+for i = 1:N+1
+    mis_S_bar(i) = mean(mis_S(:,i));
 end
-plot3 = plot(t_span, mis_S(end,:), 'b', 'LineWidth', 3); % Highlighted plot
-legend([plot2, plot3], {'Exact Stock Price', 'Mispecified Stock Price'}); % Correct usage
+plot3 = plot(t_span, mis_S_bar, 'b', 'LineWidth', 2); % Highlighted plot
+%legend('Mean of Exact Stock Price', 'Mean of Mispecified Stock Price'); % Correct usage
 
-title('Simulated stock prices')
+title('Mean of simulated stock prices')
 hold off
 
 
