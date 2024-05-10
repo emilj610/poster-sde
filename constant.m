@@ -58,4 +58,8 @@ v = exp(-r*T) * max(S-K,0);
 
 
 true_var = var(v);
+<<<<<<< HEAD
 true_value = mean(v);
+=======
+true_value = mean(v);
+>>>>>>> 858afcda1ad3d46b6b4add9b61eed95b01f42257
